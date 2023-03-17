@@ -13,6 +13,7 @@ builder.Services.AddDbContext<RecipesDBContext>();
 builder.Services.AddScoped<RecipeSeeder>();
 builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
 builder.Services.AddScoped<IIngridientService, IngridientService>();
+builder.Services.AddScoped<IRecipeService, RecipeService>();
 builder.Services.AddScoped<ErrorHandlingMiddleware>();
 
 builder.Services.AddSwaggerGen();

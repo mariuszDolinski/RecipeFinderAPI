@@ -15,18 +15,28 @@ namespace RecipeFinderAPI.Controllers
             _ingridientService = ingridientService;
         }
 
+        #region GET actions
         [HttpGet]
         public ActionResult<IEnumerable<IngridientDto>> Get() 
         {
             var result = _ingridientService.GetAll();
             return Ok(result);
         }
+        [HttpGet("{ingridientId}")]
+        public ActionResult<IEnumerable<IngridientDto>> Get([FromRoute]int ingridientId)
+        {
+            var result = _ingridientService.GetById(ingridientId);
+            return Ok(result);
+        }
+        #endregion
 
+        #region PUT actions
         [HttpPost]
-        public ActionResult CreateIngridient([FromQuery]string name)
+        public ActionResult Create([FromQuery]string name)
         {
             int id = _ingridientService.CreateIngridient(name);
             return Created($"api/ingridient/{id}", null);
         }
+        #endregion
     }
 }
