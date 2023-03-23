@@ -26,7 +26,7 @@ namespace RecipeFinderAPI.Seeders
                     _dbContext.Ingridients.AddRange(ingridients);
                     _dbContext.SaveChanges();
                 }
-                //seeding unitss with values define in enum
+                //seeding units with values define in enum
                 if (!_dbContext.Units.Any())
                 {
                     var units = GetUnits();

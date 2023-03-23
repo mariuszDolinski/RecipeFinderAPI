@@ -1,5 +1,5 @@
 # RecipeFinderAPI
-My first REST API create in ASP.Net 6.0 
+My first REST API created in ASP.Net 6.0 
 This API is used to store cooking recipes and all needed ingridients and manage them.
 It has OpenAPI specification, which was made using Swagger. 
 You need to run API locally (for example via Visual Studio), then Swagger UI should open in browser.

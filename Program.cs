@@ -3,6 +3,7 @@ using RecipeFinderAPI.Middleware;
 using RecipeFinderAPI.Seeders;
 using RecipeFinderAPI.Services;
 using System.Reflection;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,7 +14,9 @@ builder.Services.AddDbContext<RecipesDBContext>();
 builder.Services.AddScoped<RecipeSeeder>();
 builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
 builder.Services.AddScoped<IIngridientService, IngridientService>();
+builder.Services.AddScoped<IUnitService, UnitService>();
 builder.Services.AddScoped<IRecipeService, RecipeService>();
+builder.Services.AddScoped<IRecipeIngridientService, RecipeIngridientService>();
 builder.Services.AddScoped<ErrorHandlingMiddleware>();
 
 builder.Services.AddSwaggerGen();

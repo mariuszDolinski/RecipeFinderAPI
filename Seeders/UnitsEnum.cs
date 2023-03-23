@@ -11,6 +11,7 @@
         łyżka,
         łyżeczka,
         szklanka,
-        szczypta
+        szczypta,
+        sztuka
     }
 }

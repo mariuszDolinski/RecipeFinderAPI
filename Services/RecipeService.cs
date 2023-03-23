@@ -33,15 +33,14 @@ namespace RecipeFinderAPI.Services
 
             return recipe.Id;
         }
-
         public IEnumerable<RecipeDto> GetAll()
         {
             var recipes = _dbContext.Recipes
                 .Include(r => r.Ingridients)
                 .ToList();
+
             return _mapper.Map<List<RecipeDto>>(recipes);
         }
-
         public RecipeDto GetById(int id)
         {
             var recipe = _dbContext.Recipes
@@ -53,7 +52,6 @@ namespace RecipeFinderAPI.Services
 
             return _mapper.Map<RecipeDto>(recipe);
         }
-
         public void UpdateRecipe(UpdateRecipeDto dto, int id)
         {
             var recipe = _dbContext.Recipes

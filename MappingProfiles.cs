@@ -9,9 +9,12 @@ namespace RecipeFinderAPI
         public MappingProfiles() 
         {
             CreateMap<Ingridient, IngridientDto>();
+            CreateMap<Unit, UnitDto>();
             CreateMap<CreateRecipeDto, Recipe>();
             CreateMap<Recipe, RecipeDto>();
+            CreateMap<RecipeIngridient, RecipeIngridientDto>();
             CreateMap<UpdateRecipeDto, Recipe>();
+            CreateMap<CreateRecipeIngridientDto, RecipeIngridient>();
         }
     }
 }
