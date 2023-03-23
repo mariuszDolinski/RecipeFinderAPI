@@ -10,6 +10,9 @@ namespace RecipeFinderAPI.Services
     public interface IRecipeIngridientService
     {
         int Create(int recipeId, CreateRecipeIngridientDto dto);
+        IEnumerable<RecipeIngridientDto> GetAll(int recipeId);
+        RecipeIngridientDto GetById(int recipeId, int ingridientId);
+        void Update(int recipeId, CreateRecipeIngridientDto dto, int ingridientId);
     }
     public class RecipeIngridientService : IRecipeIngridientService
     {
@@ -38,6 +41,45 @@ namespace RecipeFinderAPI.Services
             return ingridientEntity.Id;
         }
 
+        public IEnumerable<RecipeIngridientDto> GetAll(int recipeId)
+        {
+            var recipe = GetRecipeById(recipeId);
+
+            return _mapper.Map<List<RecipeIngridientDto>>(recipe.Ingridients);
+        }
+        public RecipeIngridientDto GetById(int recipeId, int ingridientId)
+        {
+            var recipe = GetRecipeById(recipeId);
+            var ingridient = recipe.Ingridients.FirstOrDefault(ing => ing.Id == ingridientId);
+
+            if (ingridient is null)
+                throw new NotFoundException("Recipe ingridient not found.");
+
+            return _mapper.Map<RecipeIngridientDto>(ingridient);
+        }
+
+        public void Update(int recipeId, CreateRecipeIngridientDto dto, int ingridientId)
+        {
+            var recipe = GetRecipeById(recipeId);
+            var ingridient = recipe.Ingridients.FirstOrDefault(ing => ing.Id == ingridientId);
+            if (ingridient is null)
+                throw new NotFoundException("Ingridient not found");
+
+            var newIngridientId = GetIngridientId(dto.Name);
+            var newUnitId = GetUnitId(dto.Unit);
+
+            if(!string.IsNullOrEmpty(dto.Description))
+                ingridient.Description = dto.Description;
+            if (dto.Amount <= 0)
+                throw new BadRequestException("Amount is not correct number.");
+            ingridient.Amount = dto.Amount;
+            if (newIngridientId != 0)
+                ingridient.IngridientId = newIngridientId;
+            if (newUnitId !=0)
+                ingridient.UnitId = newUnitId;
+            _dbContext.SaveChanges();
+        }
+
         #region private methods
         private Recipe GetRecipeById(int id)
         {
@@ -52,6 +94,9 @@ namespace RecipeFinderAPI.Services
         }
         private int GetIngridientId(string name)
         {
+            if (string.IsNullOrEmpty(name))
+                return default;
+
             var ingridient = _dbContext
                 .Ingridients
                 .FirstOrDefault(r => r.Name == name);
@@ -63,6 +108,9 @@ namespace RecipeFinderAPI.Services
         }
         private int GetUnitId(string name)
         {
+            if (string.IsNullOrEmpty(name))
+                return default;
+
             var unit = _dbContext
                 .Units
                 .FirstOrDefault(r => r.Name == name);
