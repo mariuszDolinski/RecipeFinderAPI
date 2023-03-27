@@ -39,11 +39,13 @@ namespace RecipeFinderAPI.Controllers
         }
         #endregion
 
+        #region DELETE actions
         [HttpDelete("{unitId}")]
         public ActionResult Delete(int unitId) 
         { 
             _unitService.RemoveById(unitId);
             return NoContent();
         }
+        #endregion
     }
 }

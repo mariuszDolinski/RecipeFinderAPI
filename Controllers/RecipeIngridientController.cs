@@ -16,7 +16,7 @@ namespace RecipeFinderAPI.Controllers
 
         #region POST methods
         [HttpPost]
-        public ActionResult Create(int recipeId, [FromBody] CreateRecipeIngridientDto dto)
+        public ActionResult Create([FromRoute]int recipeId, [FromBody] CreateRecipeIngridientDto dto)
         {
             int id = _recipeIngridientService.Create(recipeId, dto);
 
@@ -26,13 +26,13 @@ namespace RecipeFinderAPI.Controllers
 
         #region GET methods
         [HttpGet]
-        public ActionResult<IEnumerable<RecipeIngridientDto>> Get(int recipeId) 
+        public ActionResult<IEnumerable<RecipeIngridientDto>> Get([FromRoute]int recipeId) 
         { 
             var result = _recipeIngridientService.GetAll(recipeId);
             return Ok(result);
         }
         [HttpGet("{ingridientId}")]
-        public ActionResult<RecipeIngridientDto> Get(int recipeId, [FromRoute]int ingridientId)
+        public ActionResult<RecipeIngridientDto> Get([FromRoute]int recipeId, [FromRoute]int ingridientId)
         {
             var result = _recipeIngridientService.GetById(recipeId, ingridientId);
             return Ok(result);
@@ -41,10 +41,25 @@ namespace RecipeFinderAPI.Controllers
 
         #region PUT methods
         [HttpPut("{ingridientId}")]
-        public ActionResult Update(int recipeId, [FromBody]CreateRecipeIngridientDto dto, [FromRoute]int ingridientId)
+        public ActionResult Update([FromRoute]int recipeId, [FromBody]UpdateRecipeIngridientDto dto, [FromRoute]int ingridientId)
         {
             _recipeIngridientService.Update(recipeId, dto, ingridientId);
             return Ok();
+        }
+        #endregion
+
+        #region DELETE methods
+        [HttpDelete]
+        public ActionResult Delete([FromRoute]int recipeId) 
+        {
+            _recipeIngridientService.Delete(recipeId);
+            return NoContent();
+        }
+        [HttpDelete("{ingridientId}")]
+        public ActionResult Delete([FromRoute]int recipeId, [FromRoute]int ingridientId)
+        {
+            _recipeIngridientService.DeleteById(recipeId, ingridientId);
+            return NoContent();
         }
         #endregion
     }

@@ -30,12 +30,21 @@ namespace RecipeFinderAPI.Controllers
         }
         #endregion
 
-        #region PUT actions
+        #region POST actions
         [HttpPost]
         public ActionResult Create([FromQuery]string name)
         {
             int id = _ingridientService.CreateIngridient(name);
             return Created($"api/ingridient/{id}", null);
+        }
+        #endregion
+
+        #region DELETE actions
+        [HttpDelete("{ingridientId}")]
+        public ActionResult Delete(int ingridientId)
+        {
+            _ingridientService.RemoveById(ingridientId);
+            return NoContent();
         }
         #endregion
     }

@@ -55,7 +55,7 @@ namespace RecipeFinderAPI.Services
             var isRecipeIngridient = _dbContext.RecipeIngridients
                 .Any(ri => ri.UnitId == unit.Id);
             if (isRecipeIngridient)
-                throw new BadRequestException("Unit cannot be deleted, because some recipe ingridient uses it");
+                throw new BadRequestException("Unit cannot be deleted, because some recipe ingridient uses it.");
             _dbContext.Units.Remove(unit);
             _dbContext.SaveChanges();
         }

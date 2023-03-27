@@ -33,6 +33,13 @@ namespace RecipeFinderAPI.Seeders
                     _dbContext.Units.AddRange(units);
                     _dbContext.SaveChanges();
                 }
+                //seeding basic roles
+                if (!_dbContext.Roles.Any())
+                {
+                    var roles = GetRoles();
+                    _dbContext.Roles.AddRange(roles);
+                    _dbContext.SaveChanges();
+                }
             }
         }
 
@@ -61,6 +68,27 @@ namespace RecipeFinderAPI.Seeders
             }
 
             return units;
+        }
+
+        private IEnumerable<Role> GetRoles()
+        {
+            var roles = new List<Role>()
+            {
+                new Role()
+                {
+                    Name = "Admin"
+                },
+                new Role()
+                {
+                    Name = "Manager"
+                },
+                new Role()
+                {
+                    Name = "User"
+                }
+            };
+
+            return roles;
         }
     }
 }

@@ -20,6 +20,11 @@ namespace RecipeFinderAPI.Middleware
                 context.Response.StatusCode = 404;
                 await context.Response.WriteAsync(notFoundEx.Message);
             }
+            catch
+            {
+                context.Response.StatusCode = 500;
+                await context.Response.WriteAsync("Something went wrong");
+            }
         }
     }
 }

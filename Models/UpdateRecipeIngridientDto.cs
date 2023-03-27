@@ -2,7 +2,7 @@
 
 namespace RecipeFinderAPI.Models
 {
-    public class CreateRecipeIngridientDto
+    public class UpdateRecipeIngridientDto
     {
         [Required]
         public decimal Amount { get; set; }

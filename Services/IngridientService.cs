@@ -11,6 +11,7 @@ namespace RecipeFinderAPI.Services
         IEnumerable<IngridientDto> GetAll();
         int CreateIngridient(string name);
         IngridientDto GetById(int id);
+        void RemoveById(int id);
     }
     public class IngridientService : IIngridientService
     {
@@ -35,13 +36,11 @@ namespace RecipeFinderAPI.Services
             _dbContext.SaveChanges();
             return ingridient.Id;
         }
-
         public IEnumerable<IngridientDto> GetAll()
         {
             var ingridients = _dbContext.Ingridients.ToList();
             return _mapper.Map<List<IngridientDto>>(ingridients);
         }
-
         public IngridientDto GetById(int id)
         {
             var ingridient = _dbContext
@@ -52,6 +51,25 @@ namespace RecipeFinderAPI.Services
                 throw new NotFoundException("Ingridient not found.");
 
             return _mapper.Map<IngridientDto>(ingridient);
+        }
+        public void RemoveById(int id)
+        {
+            var ingridient = GetIngridientById(id);
+            var isRecipeIngridient = _dbContext.RecipeIngridients
+                .Any(ri => ri.IngridientId == ingridient.Id);
+            if (isRecipeIngridient)
+                throw new BadRequestException("Ingridient cannot be deleted, because some recipe ingridient uses it.");
+            _dbContext.Ingridients.Remove(ingridient);
+            _dbContext.SaveChanges();
+        }
+
+        private Ingridient GetIngridientById(int id)
+        {
+            var ingridient = _dbContext.Ingridients.FirstOrDefault(x => x.Id == id);
+            if (ingridient is null)
+                throw new NotFoundException("Ingridient not found.");
+
+            return ingridient;
         }
     }
 }

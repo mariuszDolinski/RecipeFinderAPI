@@ -16,6 +16,7 @@ namespace RecipeFinderAPI
             CreateMap<RecipeIngridientDto, RecipeIngridient>();
             CreateMap<UpdateRecipeDto, Recipe>();
             CreateMap<CreateRecipeIngridientDto, RecipeIngridient>();
+            CreateMap<RegisterUserDto, User>();
         }
     }
 }

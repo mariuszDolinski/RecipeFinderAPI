@@ -10,13 +10,15 @@ namespace RecipeFinderAPI.Entities
         public DbSet<Ingridient> Ingridients { get; set; }
         public DbSet<Unit> Units { get; set; }
         public DbSet<RecipeIngridient> RecipeIngridients { get; set; }
+        public DbSet<User> Users { get; set; }
+        public DbSet<Role> Roles { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Recipe>()
                 .Property(r => r.Name)
                 .IsRequired()
-                .HasMaxLength(30);
+                .HasMaxLength(50);
 
             modelBuilder.Entity<Ingridient>()
                 .Property(d => d.Name)
@@ -36,6 +38,20 @@ namespace RecipeFinderAPI.Entities
             modelBuilder.Entity<RecipeIngridient>()
                 .Property(a => a.Description)
                 .IsRequired();
+
+            modelBuilder.Entity<User>()
+                .Property(u => u.Email)
+                .IsRequired();
+
+            modelBuilder.Entity<User>()
+                .Property(u => u.UserName)
+                .IsRequired()
+                .HasMaxLength(30);
+
+            modelBuilder.Entity<Role>()
+                .Property(r => r.Name)
+                .IsRequired();
+
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

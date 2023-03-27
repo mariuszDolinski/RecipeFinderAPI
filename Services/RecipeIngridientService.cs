@@ -12,7 +12,9 @@ namespace RecipeFinderAPI.Services
         int Create(int recipeId, CreateRecipeIngridientDto dto);
         IEnumerable<RecipeIngridientDto> GetAll(int recipeId);
         RecipeIngridientDto GetById(int recipeId, int ingridientId);
-        void Update(int recipeId, CreateRecipeIngridientDto dto, int ingridientId);
+        void Update(int recipeId, UpdateRecipeIngridientDto dto, int ingridientId);
+        void Delete(int recipeId);
+        void DeleteById(int recipeId, int ingridientId);
     }
     public class RecipeIngridientService : IRecipeIngridientService
     {
@@ -31,6 +33,8 @@ namespace RecipeFinderAPI.Services
             var unitId = GetUnitId(dto.Unit);
             GetRecipeById(recipeId);
 
+            if (dto.Amount <= 0)
+                throw new BadRequestException("Amount is not correct number.");
             var ingridientEntity = _mapper.Map<RecipeIngridient>(dto);
             ingridientEntity.RecipeId = recipeId;
             ingridientEntity.IngridientId = ingridientId;
@@ -58,7 +62,7 @@ namespace RecipeFinderAPI.Services
             return _mapper.Map<RecipeIngridientDto>(ingridient);
         }
 
-        public void Update(int recipeId, CreateRecipeIngridientDto dto, int ingridientId)
+        public void Update(int recipeId, UpdateRecipeIngridientDto dto, int ingridientId)
         {
             var recipe = GetRecipeById(recipeId);
             var ingridient = recipe.Ingridients.FirstOrDefault(ing => ing.Id == ingridientId);
@@ -67,16 +71,31 @@ namespace RecipeFinderAPI.Services
 
             var newIngridientId = GetIngridientId(dto.Name);
             var newUnitId = GetUnitId(dto.Unit);
-
-            if(!string.IsNullOrEmpty(dto.Description))
-                ingridient.Description = dto.Description;
+            
             if (dto.Amount <= 0)
                 throw new BadRequestException("Amount is not correct number.");
             ingridient.Amount = dto.Amount;
-            if (newIngridientId != 0)
-                ingridient.IngridientId = newIngridientId;
-            if (newUnitId !=0)
-                ingridient.UnitId = newUnitId;
+            ingridient.Description = dto.Description;
+            ingridient.IngridientId = newIngridientId;
+            ingridient.UnitId = newUnitId;
+            _dbContext.SaveChanges();
+        }
+
+        public void Delete(int recipeId)
+        {
+            var recipe = GetRecipeById(recipeId);
+            _dbContext.RemoveRange(recipe.Ingridients);
+            _dbContext.SaveChanges();
+        }
+
+        public void DeleteById(int recipeId, int ingridientId)
+        {
+            var recipe = GetRecipeById(recipeId);
+            var ingridient = _dbContext.RecipeIngridients.FirstOrDefault(ing =>ing.Id == ingridientId);
+            if (ingridient is null || ingridient.RecipeId != recipeId)
+                throw new NotFoundException("Ingridient not found.");
+
+            _dbContext.Remove(ingridient);
             _dbContext.SaveChanges();
         }
 
@@ -95,7 +114,7 @@ namespace RecipeFinderAPI.Services
         private int GetIngridientId(string name)
         {
             if (string.IsNullOrEmpty(name))
-                return default;
+                throw new NotFoundException("Ingridient name  is required.");
 
             var ingridient = _dbContext
                 .Ingridients
@@ -109,7 +128,7 @@ namespace RecipeFinderAPI.Services
         private int GetUnitId(string name)
         {
             if (string.IsNullOrEmpty(name))
-                return default;
+                throw new NotFoundException("Unit name is required.");
 
             var unit = _dbContext
                 .Units

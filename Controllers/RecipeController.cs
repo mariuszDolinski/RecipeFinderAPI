@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using RecipeFinderAPI.Models;
 using RecipeFinderAPI.Services;
 
@@ -37,6 +38,13 @@ namespace RecipeFinderAPI.Controllers
             int id = _recipeService.CreateRecipe(dto);
             return Created($"api/recipe/{id}", null);
         }
+        [HttpPost("searchResult")]
+        public ActionResult<IEnumerable<RecipeDto>> Find([FromBody] FindRecipesByIngridientsDto dto)
+        {
+            var result = _recipeService.GetByIngridient(dto);
+
+            return Created($"api/recipe/searchResult",result);
+        }
         #endregion
 
         #region PUT actions
@@ -45,6 +53,15 @@ namespace RecipeFinderAPI.Controllers
         {
             _recipeService.UpdateRecipe(dto, recipeId);
             return Ok();
+        }
+        #endregion
+
+        #region DELETE actions
+        [HttpDelete("{recipeId}")]
+        public ActionResult Delete(int recipeId)
+        {
+            _recipeService.RemoveById(recipeId);
+            return NoContent();
         }
         #endregion
     }
