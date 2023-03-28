@@ -21,5 +21,12 @@ namespace RecipeFinderAPI.Controllers
             _accountService.RegisterUser(dto);
             return Ok();
         }
+
+        [HttpPost("login")]
+        public ActionResult LoginUser([FromBody] LoginDto dto)
+        {
+            string token = _accountService.GenerateJwt(dto);
+            return Ok(token);
+        }
     }
 }

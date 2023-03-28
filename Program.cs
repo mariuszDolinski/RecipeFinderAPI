@@ -1,6 +1,8 @@
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
+using RecipeFinderAPI;
 using RecipeFinderAPI.Entities;
 using RecipeFinderAPI.Middleware;
 using RecipeFinderAPI.Models;
@@ -8,9 +10,30 @@ using RecipeFinderAPI.Models.Validators;
 using RecipeFinderAPI.Seeders;
 using RecipeFinderAPI.Services;
 using System.Reflection;
-using System.Text.Json.Serialization;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+
+//Add JwtToken
+var authenticationSettings = new AuthenticationSettings();
+builder.Services.AddSingleton(authenticationSettings);
+builder.Configuration.GetSection("Authentication").Bind(authenticationSettings);
+builder.Services.AddAuthentication(option =>
+{
+    option.DefaultAuthenticateScheme = "Bearer";
+    option.DefaultScheme = "Bearer";
+    option.DefaultChallengeScheme = "Bearer";
+}).AddJwtBearer(cfg =>
+{
+    cfg.RequireHttpsMetadata = false;
+    cfg.SaveToken = true;
+    cfg.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidIssuer = authenticationSettings.JwtIssuer,
+        ValidAudience = authenticationSettings.JwtIssuer,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(authenticationSettings.JwtKey))
+    };
+});
 
 // Add services to the container.
 
@@ -39,6 +62,7 @@ var seeder = scope.ServiceProvider.GetRequiredService<RecipeSeeder>();
 seeder.Seed();
 
 app.UseMiddleware<ErrorHandlingMiddleware>();
+app.UseAuthentication();
 
 app.UseHttpsRedirection();
 
