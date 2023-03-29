@@ -15,6 +15,7 @@ namespace RecipeFinderAPI.Services
     {
         void RegisterUser(RegisterUserDto dto);
         string GenerateJwt(LoginDto dto);
+        void UpdateUser(int userId, UpdateUserInfoDto dto);
     }
 
     public class AccountService : IAccountService
@@ -40,7 +41,6 @@ namespace RecipeFinderAPI.Services
             _dbContext.Users.Add(newUser);
             _dbContext.SaveChanges();
         }
-
         public string GenerateJwt(LoginDto dto)
         {
             var user = _dbContext.Users
@@ -70,6 +70,14 @@ namespace RecipeFinderAPI.Services
             var tokenHandler = new JwtSecurityTokenHandler();
             return tokenHandler.WriteToken(token);
         }
+        public void UpdateUser(int userId, UpdateUserInfoDto dto)
+        {
+            var user = GetUserById(userId);
+            user.FirstName = dto.FirstName;
+            user.LastName = dto.LastName;
+            user.DateOfBirth = dto.DateOfBirth;
+            _dbContext.SaveChanges();
+        }
 
         private List<Claim> SetClaims(User user)
         {
@@ -81,6 +89,16 @@ namespace RecipeFinderAPI.Services
                 new Claim("DateOfBirth", user.DateOfBirth.Value.ToString("yyyy-MM-dd"))
             };
             return claims;
+        }
+
+        private User GetUserById(int userId)
+        {
+            var user = _dbContext.Users.FirstOrDefault(u => u.Id == userId);
+            if (user is null)
+            {
+                throw new NotFoundException($"User not found");
+            }
+            return user;
         }
     }
 }

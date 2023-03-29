@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using RecipeFinderAPI.Models;
 using RecipeFinderAPI.Services;
+using System.Security.Claims;
 
 namespace RecipeFinderAPI.Controllers
 {
@@ -28,5 +30,17 @@ namespace RecipeFinderAPI.Controllers
             string token = _accountService.GenerateJwt(dto);
             return Ok(token);
         }
+
+        [HttpPost("user/{userId}")]
+        [Authorize]
+        public ActionResult UpdateUser(int userId, [FromBody] UpdateUserInfoDto dto) 
+        {
+            int id = int.Parse(User.Claims.First(c => c.Type == ClaimTypes.NameIdentifier).Value);
+            if (id != userId)
+                return Forbid();
+            _accountService.UpdateUser(userId, dto);
+            return Ok();
+        }
+
     }
 }

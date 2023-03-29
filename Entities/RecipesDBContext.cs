@@ -48,6 +48,10 @@ namespace RecipeFinderAPI.Entities
                 .IsRequired()
                 .HasMaxLength(30);
 
+            modelBuilder.Entity<User>()
+                .Property(u => u.DateOfBirth)
+                .HasColumnType("date");
+
             modelBuilder.Entity<Role>()
                 .Property(r => r.Name)
                 .IsRequired();

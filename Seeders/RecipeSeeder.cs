@@ -80,7 +80,7 @@ namespace RecipeFinderAPI.Seeders
                 },
                 new Role()
                 {
-                    Name = "Manager"
+                    Name = "ConfirmUser"
                 },
                 new Role()
                 {
