@@ -8,7 +8,7 @@ namespace RecipeFinderAPI.Services
 {
     public interface IIngridientService
     {
-        IEnumerable<IngridientDto> GetAll();
+        PaginationResult<IngridientDto> GetAll(IngridientQuery query);
         int CreateIngridient(string name);
         IngridientDto GetById(int id);
         void RemoveById(int id);
@@ -36,10 +36,28 @@ namespace RecipeFinderAPI.Services
             _dbContext.SaveChanges();
             return ingridient.Id;
         }
-        public IEnumerable<IngridientDto> GetAll()
+        public PaginationResult<IngridientDto> GetAll(IngridientQuery query)
         {
-            var ingridients = _dbContext.Ingridients.ToList();
-            return _mapper.Map<List<IngridientDto>>(ingridients);
+            var baseQuery = _dbContext
+                .Ingridients
+                .Where(ing => query.Search == null || ing.Name.Contains(query.Search));
+
+            var ingridients = baseQuery
+                .Skip((query.PageNumber - 1) * query.PageSize)
+                .Take(query.PageSize)
+                .ToList();
+          
+            var ingridientDtos = _mapper.Map<List<IngridientDto>>(ingridients);
+
+            var result =  new PaginationResult<IngridientDto>(ingridientDtos, baseQuery.Count(),
+                query.PageSize, query.PageNumber);
+
+            if(baseQuery.Count() > 0 && query.PageNumber > result.TotalPages)
+            {
+                throw new BadRequestException("PageNumber is to big.");
+            }
+
+            return result;
         }
         public IngridientDto GetById(int id)
         {

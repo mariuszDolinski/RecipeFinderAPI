@@ -1,12 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using RecipeFinderAPI.Models;
 using RecipeFinderAPI.Services;
+using System.Security.Claims;
 
 namespace RecipeFinderAPI.Controllers
 {
     [Route("api/recipe")]
     [ApiController]
+    [Authorize]
     public class RecipeController : ControllerBase
     {
         private readonly IRecipeService _recipeService;
@@ -18,6 +20,7 @@ namespace RecipeFinderAPI.Controllers
 
         #region GET actions
         [HttpGet]
+        [AllowAnonymous]
         public ActionResult<IEnumerable<RecipeDto>> Get()
         {
             var result = _recipeService.GetAll();
@@ -33,11 +36,13 @@ namespace RecipeFinderAPI.Controllers
 
         #region POST actions
         [HttpPost]
+        [Authorize(Roles = "Admin,ConfirmUser")]
         public ActionResult Create([FromBody]CreateRecipeDto dto)
         {
-            int id = _recipeService.CreateRecipe(dto);
-            return Created($"api/recipe/{id}", null);
+            int recipeId = _recipeService.CreateRecipe(dto);
+            return Created($"api/recipe/{recipeId}", null);
         }
+
         [HttpPost("searchResult")]
         public ActionResult<IEnumerable<RecipeDto>> Find([FromBody] FindRecipesByIngridientsDto dto)
         {

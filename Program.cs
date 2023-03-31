@@ -1,8 +1,10 @@
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using RecipeFinderAPI;
+using RecipeFinderAPI.Authorization;
 using RecipeFinderAPI.Entities;
 using RecipeFinderAPI.Middleware;
 using RecipeFinderAPI.Models;
@@ -48,8 +50,11 @@ builder.Services.AddScoped<IRecipeService, RecipeService>();
 builder.Services.AddScoped<IRecipeIngridientService, RecipeIngridientService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
+builder.Services.AddScoped<IUserContextService, UserContextService>();
+builder.Services.AddScoped<IAuthorizationHandler, ResourceOperationRequirementHandler>();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<IValidator<RegisterUserDto>, RegisterUserValidator>();
+builder.Services.AddScoped<IValidator<IngridientQuery>, IngridientQueryValidator>();
 builder.Services.AddScoped<ErrorHandlingMiddleware>();
 
 builder.Services.AddSwaggerGen();

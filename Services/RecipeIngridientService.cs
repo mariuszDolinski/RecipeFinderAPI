@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using RecipeFinderAPI.Authorization;
 using RecipeFinderAPI.Entities;
 using RecipeFinderAPI.Exceptions;
 using RecipeFinderAPI.Models;
@@ -20,18 +22,28 @@ namespace RecipeFinderAPI.Services
     {
         private readonly RecipesDBContext _dbContext;
         private readonly IMapper _mapper;
+        private readonly IUserContextService _userContextService;
+        private readonly IAuthorizationService _authorizationService;
 
-        public RecipeIngridientService(RecipesDBContext dBContext, IMapper mapper)
+        public RecipeIngridientService(RecipesDBContext dBContext, IMapper mapper, 
+            IUserContextService userContextService, IAuthorizationService authorizationService)
         {
             _dbContext = dBContext;
             _mapper = mapper;
+            _userContextService = userContextService;
+            _authorizationService = authorizationService;
         }
 
         public int Create(int recipeId, CreateRecipeIngridientDto dto)
         {
+            var recipe = GetRecipeById(recipeId);
+            
+            if (recipe.AuthorId != _userContextService.GetUserId)
+            {
+                throw new ForbidException("Operation forbidden.");
+            }
             var ingridientId = GetIngridientId(dto.Name);
             var unitId = GetUnitId(dto.Unit);
-            GetRecipeById(recipeId);
 
             if (dto.Amount <= 0)
                 throw new BadRequestException("Amount is not correct number.");
@@ -69,6 +81,13 @@ namespace RecipeFinderAPI.Services
             if (ingridient is null)
                 throw new NotFoundException("Ingridient not found");
 
+            var authorizationResult = _authorizationService.AuthorizeAsync(_userContextService.User,
+               recipe, new ResourceOperationRequirement(ResourceOperation.UpdateIngridient)).Result;
+            if (!authorizationResult.Succeeded)
+            {
+                throw new ForbidException("User not authorized for updating recipe ingridient.");
+            }
+
             var newIngridientId = GetIngridientId(dto.Name);
             var newUnitId = GetUnitId(dto.Unit);
             
@@ -84,6 +103,14 @@ namespace RecipeFinderAPI.Services
         public void Delete(int recipeId)
         {
             var recipe = GetRecipeById(recipeId);
+
+            var authorizationResult = _authorizationService.AuthorizeAsync(_userContextService.User,
+               recipe, new ResourceOperationRequirement(ResourceOperation.DeleteIngridient)).Result;
+            if (!authorizationResult.Succeeded)
+            {
+                throw new ForbidException("User not authorized for deleting recipe ingridients.");
+            }
+
             _dbContext.RemoveRange(recipe.Ingridients);
             _dbContext.SaveChanges();
         }
@@ -91,9 +118,16 @@ namespace RecipeFinderAPI.Services
         public void DeleteById(int recipeId, int ingridientId)
         {
             var recipe = GetRecipeById(recipeId);
-            var ingridient = _dbContext.RecipeIngridients.FirstOrDefault(ing =>ing.Id == ingridientId);
+            var ingridient = _dbContext.RecipeIngridients.FirstOrDefault(ing => ing.Id == ingridientId);
             if (ingridient is null || ingridient.RecipeId != recipeId)
                 throw new NotFoundException("Ingridient not found.");
+
+            var authorizationResult = _authorizationService.AuthorizeAsync(_userContextService.User,
+               recipe, new ResourceOperationRequirement(ResourceOperation.UpdateIngridient)).Result;
+            if (!authorizationResult.Succeeded)
+            {
+                throw new ForbidException("User not authorized for deleting recipe ingridient.");
+            }
 
             _dbContext.Remove(ingridient);
             _dbContext.SaveChanges();

@@ -20,6 +20,11 @@ namespace RecipeFinderAPI.Middleware
                 context.Response.StatusCode = 404;
                 await context.Response.WriteAsync(notFoundEx.Message);
             }
+            catch(ForbidException forbidEx)
+            {
+                context.Response.StatusCode = 403;
+                await context.Response.WriteAsync(forbidEx.Message);
+            }
             catch
             {
                 context.Response.StatusCode = 500;

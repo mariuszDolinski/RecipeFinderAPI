@@ -1,11 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using RecipeFinderAPI.Models;
 using RecipeFinderAPI.Services;
+using System.Security.Claims;
 
 namespace RecipeFinderAPI.Controllers
 {
     [Route("api/recipe/{recipeId}/ingridient")]
     [ApiController]
+    [Authorize]
     public class RecipeIngridientController : ControllerBase
     {
         private IRecipeIngridientService _recipeIngridientService;
@@ -16,6 +19,7 @@ namespace RecipeFinderAPI.Controllers
 
         #region POST methods
         [HttpPost]
+        [Authorize(Roles = "Admin,ConfirmUser")]
         public ActionResult Create([FromRoute]int recipeId, [FromBody] CreateRecipeIngridientDto dto)
         {
             int id = _recipeIngridientService.Create(recipeId, dto);

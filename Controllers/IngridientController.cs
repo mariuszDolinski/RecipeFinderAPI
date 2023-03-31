@@ -17,9 +17,9 @@ namespace RecipeFinderAPI.Controllers
 
         #region GET actions
         [HttpGet]
-        public ActionResult<IEnumerable<IngridientDto>> Get() 
+        public ActionResult<PaginationResult<IngridientDto>> Get([FromQuery]IngridientQuery query) 
         {
-            var result = _ingridientService.GetAll();
+            var result = _ingridientService.GetAll(query);
             return Ok(result);
         }
         [HttpGet("{ingridientId}")]

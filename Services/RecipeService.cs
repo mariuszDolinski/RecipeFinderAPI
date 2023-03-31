@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using RecipeFinderAPI.Authorization;
 using RecipeFinderAPI.Entities;
 using RecipeFinderAPI.Exceptions;
 using RecipeFinderAPI.Models;
@@ -23,16 +25,22 @@ namespace RecipeFinderAPI.Services
     {
         private readonly RecipesDBContext _dbContext;
         private readonly IMapper _mapper;
+        private readonly IUserContextService _userContextService;
+        private readonly IAuthorizationService _authorizationService;
 
-        public RecipeService(RecipesDBContext dBContext, IMapper mapper)
+        public RecipeService(RecipesDBContext dBContext, IMapper mapper, 
+            IUserContextService userContextService, IAuthorizationService authorizationService)
         {
             _dbContext = dBContext;
             _mapper = mapper;
+            _userContextService = userContextService;
+            _authorizationService = authorizationService;
         }
 
         public int CreateRecipe(CreateRecipeDto dto)
         {
             var recipe = _mapper.Map<Recipe>(dto);
+            recipe.AuthorId = _userContextService.GetUserId;
             _dbContext.Recipes.Add(recipe);
             _dbContext.SaveChanges();
 
@@ -54,11 +62,15 @@ namespace RecipeFinderAPI.Services
         }
         public void UpdateRecipe(UpdateRecipeDto dto, int id)
         {
-            var recipe = _dbContext.Recipes
-                .FirstOrDefault(r => r.Id == id);
+            var recipe = GetRecipeById(id);
 
-            if (recipe is null)
-                throw new NotFoundException("Recipe not found");
+            var authorizationResult = _authorizationService.AuthorizeAsync(_userContextService.User,
+                recipe, new ResourceOperationRequirement(ResourceOperation.Update)).Result;
+
+            if (!authorizationResult.Succeeded)
+            {
+                throw new ForbidException("User not authorized for updating recipe.");
+            }
 
             recipe.Name = dto.Name;
             if(dto.Description is not null)
@@ -102,6 +114,15 @@ namespace RecipeFinderAPI.Services
         public void RemoveById(int id)
         {
             var recipe = GetRecipeById(id);
+
+            var authorizationResult = _authorizationService.AuthorizeAsync(_userContextService.User,
+                recipe, new ResourceOperationRequirement(ResourceOperation.Delete)).Result;
+
+            if (!authorizationResult.Succeeded)
+            {
+                throw new ForbidException("User not authorized for deleting recipe.");
+            }
+
             _dbContext.Recipes.Remove(recipe);
             _dbContext.SaveChanges();
         }

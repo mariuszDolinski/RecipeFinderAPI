@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.EntityFrameworkCore;
 using RecipeFinderAPI.Entities;
 using RecipeFinderAPI.Exceptions;
@@ -10,6 +10,7 @@ namespace RecipeFinderAPI.Services
     public interface IAdminService
     {
         void ChangeRole(int userId, string role);
+        void UpdateRecipeAuthor(int recipeId, int authorId);
         IEnumerable<UserDto> GetAllUsers();
     }
     public class AdminService : IAdminService
@@ -39,6 +40,17 @@ namespace RecipeFinderAPI.Services
             _dbContext.SaveChanges();
         }
 
+        public void UpdateRecipeAuthor(int recipeId, int authorId)
+        {
+            var recipe = GetRecipeById(recipeId);
+            if(!_dbContext.Users.Any(u => u.Id == authorId) )
+            {
+                throw new NotFoundException("User not found");
+            }
+            recipe.AuthorId = authorId;
+            _dbContext.SaveChanges();;
+        }
+
         public IEnumerable<UserDto> GetAllUsers()
         {
             var users = _dbContext.Users
@@ -55,6 +67,15 @@ namespace RecipeFinderAPI.Services
                 throw new NotFoundException($"User not found");
             }
             return user;
+        }
+        private Recipe GetRecipeById(int recipeId)
+        {
+            var recipe = _dbContext.Recipes.FirstOrDefault(u => u.Id == recipeId);
+            if (recipe is null)
+            {
+                throw new NotFoundException($"Recipe not found");
+            }
+            return recipe;
         }
     }
 }
