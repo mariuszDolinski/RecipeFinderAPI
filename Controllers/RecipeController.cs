@@ -26,6 +26,7 @@ namespace RecipeFinderAPI.Controllers
             var result = _recipeService.GetAll();
             return Ok(result);
         }
+
         [HttpGet("{recipeId}")]
         public ActionResult<RecipeDto> Get([FromRoute]int recipeId)
         {
@@ -37,6 +38,7 @@ namespace RecipeFinderAPI.Controllers
         #region POST actions
         [HttpPost]
         [Authorize(Roles = "Admin,ConfirmUser")]
+        [Authorize(Policy = "IsAdult")]
         public ActionResult Create([FromBody]CreateRecipeDto dto)
         {
             int recipeId = _recipeService.CreateRecipe(dto);
@@ -44,9 +46,9 @@ namespace RecipeFinderAPI.Controllers
         }
 
         [HttpPost("searchResult")]
-        public ActionResult<IEnumerable<RecipeDto>> Find([FromBody] FindRecipesByIngridientsDto dto)
+        public ActionResult<IEnumerable<RecipeDto>> Find([FromBody] FindRecipesByIngridientsDto dto, [FromQuery]int mode)
         {
-            var result = _recipeService.GetByIngridient(dto);
+            var result = _recipeService.GetByIngridient(dto, mode);
 
             return Created($"api/recipe/searchResult",result);
         }

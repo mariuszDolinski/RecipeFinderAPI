@@ -16,7 +16,7 @@ namespace RecipeFinderAPI.Services
         int CreateRecipe(CreateRecipeDto dto);
         IEnumerable<RecipeDto> GetAll();
         RecipeDto GetById(int id);
-        IEnumerable<RecipeDto> GetByIngridient(FindRecipesByIngridientsDto dto);
+        IEnumerable<RecipeDto> GetByIngridient(FindRecipesByIngridientsDto dto, int mode);
         void UpdateRecipe(UpdateRecipeDto dto, int id);
         void RemoveById(int id);
     }
@@ -58,6 +58,13 @@ namespace RecipeFinderAPI.Services
         {
             var recipe = GetRecipeById(id);
 
+            var authorizationResult = _authorizationService.AuthorizeAsync(_userContextService.User,
+                recipe, new AdultsOnlyRequirement()).Result;
+            if (!authorizationResult.Succeeded)
+            {
+                throw new ForbidException("User is to young to see this recipe.");
+            }
+
             return _mapper.Map<RecipeDto>(recipe);
         }
         public void UpdateRecipe(UpdateRecipeDto dto, int id)
@@ -77,7 +84,15 @@ namespace RecipeFinderAPI.Services
                 recipe.Description = dto.Description;
             _dbContext.SaveChanges();
         }
-        public IEnumerable<RecipeDto> GetByIngridient(FindRecipesByIngridientsDto dto)
+        /// <summary>
+        /// Find all recipe by given string list of ingridients and mode value
+        /// </summary>
+        /// <param name="dto">list of ingridients names as strings</param>
+        /// <param name="mode">if 0 (default) recipes that have all given ingridients will be searched
+        /// , if 1 recipes with all ingridients only from given list will be searched</param>
+        /// <returns></returns>
+        /// <exception cref="BadRequestException"></exception>
+        public IEnumerable<RecipeDto> GetByIngridient(FindRecipesByIngridientsDto dto, int mode)
         {
             if (dto is null || dto.Ingridients.IsNullOrEmpty())
             {
@@ -88,6 +103,7 @@ namespace RecipeFinderAPI.Services
                 Include(r => r.Ingridients).ToList();
             var result = new List<RecipeDto>();
             int count;
+            int modeCount;
             foreach (var recipe in recipes)
             {
                 if (recipe.Ingridients.IsNullOrEmpty())
@@ -103,7 +119,8 @@ namespace RecipeFinderAPI.Services
                         count++;
                     }
                 }
-                if (count == dto.Ingridients.Count)
+                modeCount = (mode == 0) ? dto.Ingridients.Count : recipe.Ingridients.Count;
+                if (count == modeCount)
                 {
                     result.Add(_mapper.Map<RecipeDto>(recipe));
                 }

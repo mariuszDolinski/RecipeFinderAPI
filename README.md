@@ -1,13 +1,20 @@
 # RecipeFinderAPI
 My first REST API created in ASP.Net 6.0 
-This API is used to store cooking recipes and all needed ingridients and manage them.
-Each recipe has list of recipeIngridients store in separate table (1 to many relation).
-Each recipeIngridient has name, description and foreign keys for ingridient and unit name store in separate table (1 to many relation)
-Endpoint /api/recipe/searchResult provides a search method (on POST action) which return all recipes wich have all given ingridients names (in body request).
-API has authentication and authorization which allows only authenticated users use API endpoints.
-Authentication and authorization mechanisms are implemented using AspNetCore.Identity and JWT tokens.
-It has OpenAPI specification, which was made using Swagger. 
-You need to run API locally (for example via Visual Studio), then Swagger UI should open in browser.
+<ul>
+<li>This API is used to store cooking recipes and all needed ingridients and manage them.</li>
+<li>Each recipe has list of recipeIngridients store in separate table (1 to many relation).</li>
+<li>Each recipeIngridient has name, description and foreign keys for ingridient and unit name store in separate table (1 to many relation).</li>
+<li>Endpoint /api/recipe/searchResult?mode=number return a search result (on POST action) based on number given as query parameter
+<ul>
+<li>number = 0 (default) - return all recipes that have all ingridients from given list (recipe may have some other ingridients)</li>
+<li>number = 1 - return all recipes that have ingridients only from given list (not necessary all of them)</li>
+</ul>
+</li>
+<li>API has authentication and authorization which allows to register and log in users and use API endpoints only by authenticated users.</li>
+<li>Authentication and authorization mechanisms are implemented using AspNetCore.Identity and JWT tokens.</li>
+<li>It has OpenAPI specification, which was made using Swagger. </li>
+<li>You need to run API locally (for example via Visual Studio), then Swagger UI should open in browser. API used local database named (localdb)\localRecipeFinderDB. Fell free to change connection string if needed. It is hardcoded in Entities/RecipesDBContext.cs</li>
+</ul>
 
 <h1>Technology and package used:</h1>
 <ul>

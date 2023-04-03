@@ -39,6 +39,11 @@ builder.Services.AddAuthentication(option =>
 
 // Add services to the container.
 
+builder.Services.AddAuthorization(auth =>
+{
+    auth.AddPolicy("IsAdult", builder => builder.AddRequirements(new MinimumAgeRequirement(18)));
+});
+
 builder.Services.AddControllers();
 builder.Services.AddFluentValidationAutoValidation().AddFluentValidationClientsideAdapters();
 builder.Services.AddDbContext<RecipesDBContext>();
@@ -52,6 +57,8 @@ builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<IUserContextService, UserContextService>();
 builder.Services.AddScoped<IAuthorizationHandler, ResourceOperationRequirementHandler>();
+builder.Services.AddScoped<IAuthorizationHandler, AdultsOnlyRequirementHandler>();
+builder.Services.AddScoped<IAuthorizationHandler, MinimumAgeRequirementHandler>();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<IValidator<RegisterUserDto>, RegisterUserValidator>();
 builder.Services.AddScoped<IValidator<IngridientQuery>, IngridientQueryValidator>();
