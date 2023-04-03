@@ -22,6 +22,7 @@ My first REST API created in ASP.Net 6.0
 <li>ASP.NET Core Web Api</li>
 <li>.Net 6.0</li>
 <li>Entity Framework 7.0.3</li>
+<li>SQL Server</li>
 <li>FluentValidation 11.2.2</li>
 <li>AspNetCore.Authentication.JwtBearer 6.0.15</li>
 <li>AspNetCore.Identity 2.2.0</li>
